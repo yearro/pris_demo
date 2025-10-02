@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mockups Conversacionales - Estilo WhatsApp</title>
+  <style>
+    :root{
+      --bg:#e5ddd5;
+      --chat:#ffffff;
+      --bot:#dcf8c6;
+      --text:#111;
+      --accent:#075e54;
+      --accent2:#128c7e;
+      --muted:#666;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:#f2f2f2; color:var(--text);
+      display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+    }
+    .phone{
+      width:390px; height:780px; background:var(--bg);
+      border-radius:36px; box-shadow:0 12px 40px rgba(0,0,0,.25);
+      border:8px solid #000; position:relative; overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    .statusbar{height:24px; background:#000; color:#fff; font-size:12px; display:flex; align-items:center; justify-content:flex-end; padding:0 12px;}
+    .header{
+      background:linear-gradient(180deg, #02cfb7, #26f4dc);
+      color:#fff; padding:12px 14px; display:flex; align-items:center; gap:10px;
+    }
+    .avatar{width:36px; height:36px; border-radius:50%; background:#fff3; display:inline-block}
+    .title{font-weight:700}
+    .subtitle{font-size:12px; opacity:.9}
+    .tabbar{
+      display:flex; gap:8px; padding:10px; background:#f7f7f7; border-bottom:1px solid #e5e5e5;
+    }
+    .tabbar button{
+      flex:1; border:none; padding:10px; border-radius:999px; cursor:pointer;
+      background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06); font-weight:600;
+    }
+    .tabbar button.active{ background: #02cfb7; color:#fff }
+    .chat{
+      flex:1; overflow:auto; padding:14px; background:url('data:image/svg+xml;utf8,\
+      <svg xmlns="http://www.w3.org/2000/svg" width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'>\
+      <g fill=\'%23ffffff\' fill-opacity=\'0.25\'><circle cx=\'10\' cy=\'10\' r=\'1\'/><circle cx=\'100\' cy=\'40\' r=\'1\'/>\
+      <circle cx=\'160\' cy=\'140\' r=\'1\'/><circle cx=\'40\' cy=\'180\' r=\'1\'/></g></svg>') repeat;
+    }
+    .bubble{
+      max-width:78%; padding:10px 12px; border-radius:16px; margin:6px 0; position:relative; line-height:1.35;
+      box-shadow:0 1px 0 rgba(0,0,0,.06);
+      white-space:pre-wrap;
+    }
+    .bot{ background:var(--bot); align-self:flex-start; border-top-left-radius:4px; }
+    .user{ background:var(--chat); align-self:flex-end; border-top-right-radius:4px; }
+    .meta{ font-size:11px; color:var(--muted); margin-top:2px }
+    .actions{ padding:10px; display:flex; gap:10px; border-top:1px solid #e5e5e5; background:#fff;}
+    .actions button{
+      flex:1; border:none; padding:12px; border-radius:12px; cursor:pointer; font-weight:700;
+      background: #02cfb7; color:#fff;
+    }
+    .actions button.secondary{ background:#e8f5f2; color:#0f5132; border:1px solid #bde5d8; }
+    .pillrow{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px }
+    .pill{ background:#fff; border:1px solid #d9efe9; color:#0f5132; padding:6px 10px; border-radius:999px; font-size:12px; display:inline-flex; align-items:center; gap:6px}
+    .card{
+      background:#fff; border:1px solid #eee; border-radius:12px; padding:10px; margin-top:8px; font-size:13px;
+    }
+    .card b{display:block; margin-bottom:6px}
+    .footer{
+      text-align:center; font-size:12px; color:#777; margin-top:8px;
+    }
+    .hint{font-size:12px; color:#666; text-align:center; padding:6px 10px;}
+  </style>
+</head>
+<body>
+  <div class="phone" role="application">
+    <div class="statusbar">9:41 ▰▰▰ ▰ ▰  LTE 📶 🔋</div>
+    <div class="header">
+      <div class="avatar"></div>
+      <div>
+        <div class="title">Business Case - Prototipo</div>
+        <div class="subtitle">Agente virtual • en línea</div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <button id="tab-estado" class="active" onclick="setScenario('estado')">Estado de cuenta</button>
+      <button id="tab-bloqueo" onclick="setScenario('bloqueo')">Cuenta bloqueada</button>
+      <button id="tab-domicilio" onclick="setScenario('domicilio')">Cambio de domicilio</button>
+    </div>
+
+    <div id="chat" class="chat" aria-live="polite"></div>
+    <div class="hint">Pulsa “Siguiente” para avanzar la conversación simulada.</div>
+    <div class="actions">
+      <button onclick="next()">Siguiente ▶</button>
+      <button class="secondary" onclick="resetScenario()">Reiniciar 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    // Conversaciones predefinidas basadas en el business case
+    const conversations = {
+      estado: [
+        { from: 'user', text: 'Hola, quiero ver mi estado de cuenta.' },
+        { from: 'bot',  text: '¡Hola Juan! 👋 Ya validé tu cuenta activa en tiempo real.' },
+        { from: 'bot',  text: 'Aquí está tu estado de cuenta:\n• Saldo: $560 MXN\n• Fecha límite: 15/10/2025\n• Recargos: $0', card: {title:'Estado de cuenta', rows:[
+          ['Saldo', '$560 MXN'],['Fecha límite','15/10/2025'],['Recargos','$0']
+        ]}},
+        { from: 'bot',  text: '¿Deseas pagar ahora o recibir un recordatorio?', pills:[
+          {label:'Pagar ahora 💳'}, {label:'Recordatorio ⏰'}
+        ]},
+        { from: 'user', text: 'Pagar ahora 💳' },
+        { from: 'bot',  text: 'Perfecto. Te envío a una pasarela segura. ¿Confirmas el pago de $560 MXN?' , pills:[{label:'Confirmar'}, {label:'Cancelar'}]},
+        { from: 'user', text: 'Confirmar' },
+        { from: 'bot',  text: '✅ Pago confirmado. ¿Quieres recibir el comprobante por correo o WhatsApp?', pills:[{label:'Correo'}, {label:'WhatsApp'}]},
+      ],
+      bloqueo: [
+        { from: 'user', text: 'No tengo servicio, ¿qué pasa?' },
+        { from: 'bot',  text: 'Revisé tu cuenta y aparece en *cobranza por falta de pago*.' },
+        { from: 'bot',  text: 'Última factura pendiente: $799 MXN\nFecha de vencimiento: 25/09/2025', card: {title:'Detalle de cobranza', rows:[
+          ['Monto pendiente','$799 MXN'],['Vencimiento','25/09/2025'],['Estatus','Bloqueo por mora']
+        ]}},
+        { from: 'bot',  text: 'Puedes realizar el pago ahora o elegir un plan de financiamiento.', pills:[
+          {label:'Pagar ahora 💳'},{label:'Ver opciones de financiamiento'}
+        ]},
+        { from: 'user', text: 'Ver opciones de financiamiento' },
+        { from: 'bot',  text: 'Ofrecemos: \n• 2 pagos quincenales\n• 3 pagos mensuales\n¿Con cuál te gustaría continuar?', pills:[{label:'2 pagos'}, {label:'3 pagos'}]},
+        { from: 'user', text: '3 pagos' },
+        { from: 'bot',  text: 'Excelente. Te comparto el cronograma y enlace seguro para el primer pago.'},
+      ],
+      domicilio: [
+        { from: 'user', text: 'Quiero cambiar mi domicilio.' },
+        { from: 'bot',  text: '¡Claro! 🚚 Necesito validar tus datos.' },
+        { from: 'bot',  text: 'Nombre: Juan Pérez\nDirección actual: Calle Reforma 123, CDMX', card: {title:'Datos actuales', rows:[
+          ['Nombre','Juan Pérez'],['Dirección','Calle Reforma 123, CDMX']
+        ]}},
+        { from: 'bot',  text: '¿Quieres actualizar la dirección ahora?', pills:[{label:'Sí, cambiar dirección'}, {label:'Más tarde'}]},
+        { from: 'user', text: 'Sí, cambiar dirección' },
+        { from: 'bot',  text: 'Por favor comparte la nueva dirección o mándame tu ubicación 📍' },
+        { from: 'user', text: 'Nueva dirección: Av. Insurgentes Sur 456, CDMX' },
+        { from: 'bot',  text: 'Listo ✅. Actualicé tu dirección y te envié un correo con la confirmación.' },
+      ]
+    };
+
+    let current = 'estado';
+    let idx = 0;
+
+    function setScenario(key){
+      current = key; idx = 0;
+      document.getElementById('tab-estado').classList.toggle('active', key==='estado');
+      document.getElementById('tab-bloqueo').classList.toggle('active', key==='bloqueo');
+      document.getElementById('tab-domicilio').classList.toggle('active', key==='domicilio');
+      const chat = document.getElementById('chat');
+      chat.innerHTML = '';
+      appendSystem('Has cambiado al flujo: ' + (key==='estado'?'Estado de cuenta': key==='bloqueo'?'Cuenta bloqueada':'Cambio de domicilio'));
+    }
+
+    function resetScenario(){
+      idx = 0;
+      const chat = document.getElementById('chat');
+      chat.innerHTML = '';
+      appendSystem('Conversación reiniciada.');
+    }
+
+    function appendSystem(text){
+      const el = document.createElement('div');
+      el.className = 'bubble bot';
+      el.style.background = '#eef7ee';
+      el.textContent = text;
+      document.getElementById('chat').appendChild(el);
+      scrollBottom();
+    }
+
+    function next(){
+      const seq = conversations[current];
+      if(idx >= seq.length){ appendSystem('Fin del flujo. Cambia de pestaña o reinicia.'); return; }
+      const step = seq[idx++];
+      renderMessage(step);
+    }
+
+    function renderMessage(step){
+      const chat = document.getElementById('chat');
+      const wrap = document.createElement('div');
+      wrap.className = 'bubble ' + (step.from === 'user' ? 'user' : 'bot');
+      wrap.textContent = step.text;
+
+      // Tarjeta de datos
+      if(step.card){
+        const card = document.createElement('div');
+        card.className = 'card';
+        const title = document.createElement('b'); title.textContent = step.card.title; card.appendChild(title);
+        step.card.rows.forEach(([k,v])=>{
+          const row = document.createElement('div'); row.textContent = k + ': ' + v; card.appendChild(row);
+        });
+        wrap.appendChild(card);
+      }
+
+      // Chips/píldoras
+      if(step.pills){
+        const row = document.createElement('div'); row.className = 'pillrow';
+        step.pills.forEach(p=>{
+          const pill = document.createElement('span');
+          pill.className = 'pill'; pill.textContent = p.label;
+          pill.onclick = ()=>{
+            // respuesta simulada al pulsar una opción
+            renderMessage({from:'user', text: p.label});
+          };
+          row.appendChild(pill);
+        });
+        wrap.appendChild(row);
+      }
+
+      chat.appendChild(wrap);
+      scrollBottom();
+    }
+
+    function scrollBottom(){
+      const chat = document.getElementById('chat');
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Inicializar
+    setScenario('estado');
+  </script>
+</body>
+</html>
