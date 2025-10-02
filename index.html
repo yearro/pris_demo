@@ -185,8 +185,16 @@
       const chat = document.getElementById('chat');
       const wrap = document.createElement('div');
       wrap.className = 'bubble ' + (step.from === 'user' ? 'user' : 'bot');
-      wrap.textContent = step.text;
-
+      if(step.text === 'Sí, cambiar dirección') {
+        const newLink = document.createElement('a');
+        newLink.href = 'https://airtable.com/app7Y1eMTYyXHCFIa/pagL9pDB1ss6Ky6MW/form';
+        newLink.textContent = 'Cargar documento';
+        newLink.target = '_blank'
+        wrap.appendChild(newLink);
+      } else {
+       wrap.textContent = step.text;
+      }
+      
       // Tarjeta de datos
       if(step.card){
         const card = document.createElement('div');
